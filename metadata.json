@@ -1,0 +1,7 @@
+{
+  "name": "CatatBelanja - Smart Expense & Receipt AI",
+  "description": "Aplikasi pencatat item belanjaan pintar dengan scan foto bon AI, spreadsheet real-time, visualisasi grafik pengeluaran, ekspor PDF, pengingat harian, dan integrasi mutasi perbankan.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
