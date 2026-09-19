@@ -9,17 +9,21 @@ import {
   TableProperties, 
   Landmark, 
   CheckCircle2, 
-  Flame 
+  Flame,
+  FileSpreadsheet,
+  Users
 } from 'lucide-react';
 import { DailyReminderConfig } from '../types';
 
 interface HeaderProps {
-  activeTab: 'spreadsheet' | 'analytics' | 'bank';
-  setActiveTab: (tab: 'spreadsheet' | 'analytics' | 'bank') => void;
+  activeTab: 'spreadsheet' | 'analytics' | 'bank' | 'sheets';
+  setActiveTab: (tab: 'spreadsheet' | 'analytics' | 'bank' | 'sheets') => void;
   onOpenManualModal: () => void;
   onOpenScannerModal: () => void;
   onOpenReminderModal: () => void;
   onOpenPdfModal: () => void;
+  onOpenSheetsModal: () => void;
+  isGoogleConnected: boolean;
   reminderConfig: DailyReminderConfig;
   totalItemsCount: number;
 }
@@ -31,6 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenScannerModal,
   onOpenReminderModal,
   onOpenPdfModal,
+  onOpenSheetsModal,
+  isGoogleConnected,
   reminderConfig,
   totalItemsCount,
 }) => {
@@ -61,6 +67,29 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Actions (Scan Foto, Input Manual, Ekspor PDF, Reminder) */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Google Sheets Sync Button */}
+            <button
+              id="btn-header-google-sheets"
+              onClick={onOpenSheetsModal}
+              className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-all border ${
+                isGoogleConnected
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 shadow-2xs'
+              }`}
+              title="Sinkronisasi Google Sheets & Drive (Kolaborasi Suami Istri)"
+            >
+              <FileSpreadsheet className={`w-4 h-4 ${isGoogleConnected ? 'text-emerald-600' : 'text-emerald-600'}`} />
+              <span className="hidden sm:inline font-semibold">Google Sheets</span>
+              {isGoogleConnected ? (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              ) : (
+                <span className="text-[10px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold">Drive</span>
+              )}
+            </button>
+
             {/* Streak & Reminder button */}
             <button
               id="btn-header-reminder"
@@ -154,6 +183,22 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </button>
+
+            <button
+              id="nav-tab-sheets"
+              onClick={() => setActiveTab('sheets')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                activeTab === 'sheets'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>Google Sheets & Drive</span>
+              <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">
+                Suami-Istri
               </span>
             </button>
           </nav>

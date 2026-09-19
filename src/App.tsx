@@ -3,13 +3,16 @@ import { Header } from './components/Header';
 import { SpreadsheetView } from './components/SpreadsheetView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { BankIntegrationView } from './components/BankIntegrationView';
+import { GoogleSheetsView } from './components/GoogleSheetsView';
 import { ReceiptScannerModal } from './components/ReceiptScannerModal';
 import { ManualInputModal } from './components/ManualInputModal';
 import { ReminderSettingsModal } from './components/ReminderSettingsModal';
 import { PdfExportModal } from './components/PdfExportModal';
+import { GoogleSheetsSyncModal } from './components/GoogleSheetsSyncModal';
 import { ExpenseItem, DailyReminderConfig, BankMutation } from './types';
 import { INITIAL_EXPENSE_ITEMS, DEFAULT_REMINDER_CONFIG } from './data/sampleData';
 import { Camera, Plus, Bell } from 'lucide-react';
+import { initAuth } from './services/googleAuth';
 
 export default function App() {
   // Load expenses from local persistence or initial sample data
@@ -39,18 +42,34 @@ export default function App() {
   });
 
   // Active view tab
-  const [activeTab, setActiveTab] = useState<'spreadsheet' | 'analytics' | 'bank'>('spreadsheet');
+  const [activeTab, setActiveTab] = useState<'spreadsheet' | 'analytics' | 'bank' | 'sheets'>('spreadsheet');
 
   // Modals state
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isPdfOpen, setIsPdfOpen] = useState(false);
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
+
+  // Google Auth & Sync Connection state
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = initAuth(
+      (user, token) => {
+        setIsGoogleConnected(!!user && !!token);
+      },
+      () => {
+        setIsGoogleConnected(false);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   // In-app alert banner
-  const [bannerAlert, setBannerAlert] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+  const [bannerAlert, setBannerAlert] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  const showAlert = (message: string, type: 'success' | 'info' = 'success') => {
+  const showAlert = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setBannerAlert({ message, type });
     setTimeout(() => setBannerAlert(null), 4000);
   };
@@ -181,6 +200,8 @@ export default function App() {
         onOpenScannerModal={() => setIsScannerOpen(true)}
         onOpenReminderModal={() => setIsReminderOpen(true)}
         onOpenPdfModal={() => setIsPdfOpen(true)}
+        onOpenSheetsModal={() => setIsSheetsModalOpen(true)}
+        isGoogleConnected={isGoogleConnected}
         reminderConfig={reminderConfig}
         totalItemsCount={items.length}
       />
@@ -192,6 +213,8 @@ export default function App() {
             className={`p-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-between shadow-2xs animate-fadeIn ${
               bannerAlert.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : bannerAlert.type === 'error'
+                ? 'bg-rose-50 text-rose-800 border-rose-200'
                 : 'bg-blue-50 text-blue-800 border-blue-200'
             }`}
           >
@@ -217,6 +240,8 @@ export default function App() {
             onOpenScanner={() => setIsScannerOpen(true)}
             onOpenManual={() => setIsManualOpen(true)}
             onOpenBankSync={() => setActiveTab('bank')}
+            onOpenSheetsSync={() => setIsSheetsModalOpen(true)}
+            isGoogleConnected={isGoogleConnected}
           />
         )}
 
@@ -226,6 +251,14 @@ export default function App() {
 
         {activeTab === 'bank' && (
           <BankIntegrationView onImportMutation={handleImportBankMutation} />
+        )}
+
+        {activeTab === 'sheets' && (
+          <GoogleSheetsView
+            items={items}
+            onUpdateAllItems={(newItems) => setItems(newItems)}
+            onShowAlert={showAlert}
+          />
         )}
       </main>
 
@@ -253,6 +286,14 @@ export default function App() {
         isOpen={isPdfOpen}
         onClose={() => setIsPdfOpen(false)}
         items={items}
+      />
+
+      <GoogleSheetsSyncModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
+        items={items}
+        onUpdateAllItems={(newItems) => setItems(newItems)}
+        onShowAlert={showAlert}
       />
 
       {/* Floating Action Button (FAB) on Mobile */}

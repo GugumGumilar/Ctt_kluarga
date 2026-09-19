@@ -27,6 +27,8 @@ interface SpreadsheetViewProps {
   onOpenScanner: () => void;
   onOpenManual: () => void;
   onOpenBankSync: () => void;
+  onOpenSheetsSync?: () => void;
+  isGoogleConnected?: boolean;
 }
 
 export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
@@ -37,6 +39,8 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
   onOpenScanner,
   onOpenManual,
   onOpenBankSync,
+  onOpenSheetsSync,
+  isGoogleConnected,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
@@ -272,6 +276,23 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
             <Plus className="w-3.5 h-3.5 text-emerald-600" />
             <span>Tambah Baris</span>
           </button>
+
+          {onOpenSheetsSync && (
+            <button
+              id="btn-open-google-sheets-modal"
+              onClick={onOpenSheetsSync}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-2xs ${
+                isGoogleConnected
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300'
+              }`}
+              title="Sinkronisasi & Buka di Google Drive / Sheets (Kolaborasi Suami Istri)"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Google Sheets</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            </button>
+          )}
 
           <button
             id="btn-copy-sheets"
